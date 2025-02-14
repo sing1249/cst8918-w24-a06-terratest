@@ -33,4 +33,15 @@ func TestAzureLinuxVMCreation(t *testing.T) {
 
 	// Confirm VM exists
 	assert.True(t, azure.VirtualMachineExists(t, vmName, resourceGroupName, subscriptionID))
+
+	// Confirm NIC exists and is connected to the VM
+	nics := azure.GetVirtualMachineNics(t, vmName, resourceGroupName, subscriptionID)
+	assert.NotEmpty(t, nics, "VM should have at least one NIC connected")
+
+	// Confirm the VM is running the correct Ubuntu version
+	expectedUbuntuSKU := "22_04-lts-gen2" 
+	vmImage := azure.GetVirtualMachineImage(t, vmName, resourceGroupName, subscriptionID)
+	assert.Equal(t, "Canonical", vmImage.Publisher, "The VM should be from Canonical")
+	assert.Equal(t, "UbuntuServer", vmImage.Offer, "The VM should be an Ubuntu Server")
+	assert.Equal(t, expectedUbuntuSKU, vmImage.SKU, "The VM should be running the expected Ubuntu version")
 }
